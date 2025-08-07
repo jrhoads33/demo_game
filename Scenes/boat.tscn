@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://d0qni2s6autqw"]
 
 [ext_resource type="Texture2D" uid="uid://baweitnfj3enk" path="res://Sprites/tilemap/boat.png" id="1_annr2"]
-[ext_resource type="Script" uid="uid://brwgh31tia1ib" path="res://boat.gd" id="1_viw7v"]
+[ext_resource type="Script" uid="uid://co47lovrb7yhp" path="res://Scripts/boat.gd" id="3_henu8"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_henu8"]
 
@@ -13,9 +13,7 @@ height = 16.8
 light_mask = 2
 visibility_layer = 2
 scale = Vector2(5, 5)
-script = ExtResource("1_viw7v")
-acceleration = 250.0
-linear_damping = 0.1
+script = ExtResource("3_henu8")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1

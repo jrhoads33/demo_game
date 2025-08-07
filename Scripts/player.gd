@@ -1,8 +1,10 @@
-extends CharacterBody2D
+extends Area2D
 @export var projectile_scene : PackedScene = preload("res://Scenes/Projectile.tscn")
 @export var projectile_spawn_offset : float = 8.0   # moves bullet out of the player hurtbox
 @export var fire_cooldown := 0.2                     # seconds between shots
 var time_since_last_shot := 0.0  # initialize at the script level
+@onready var health_label : Label = $Label
+@onready var knockback_timer : Timer = $KnockbackTimer
 
 @export var move_speed := 100.0
 var last_facing_dir : Vector2 = Vector2.RIGHT   # (1, 0)
@@ -11,10 +13,16 @@ var near_boat := false
 @onready var vehicle = get_parent().get_node("boat")
 signal boarded
 signal deboarded
+var player_health := 100
+var velocity : Vector2
+var knockback_velocity 
+
+var resistance = 5
+
+var stunned := false
 
 func _ready():
 	add_to_group('player')
-	
 	vehicle.player_entered_zone.connect(_on_player_near_vehicle)
 	vehicle.player_exited_zone.connect(_on_player_left_vehicle)
 	
@@ -34,6 +42,8 @@ func _input(event):
 		
 
 func _physics_process(delta):
+	if stunned:
+		return
 	if not on_board:
 		_handle_movement(delta)
 	else:
@@ -61,8 +71,7 @@ func _handle_movement(delta: float) -> void:
 	velocity = input_vector * move_speed
 
 	# Move the player
-	move_and_slide()
-
+	position += velocity * delta 
 	
 func _spawn_projectile(dir: Vector2) -> void:
 	var bullet := projectile_scene.instantiate() as Projectile
@@ -71,7 +80,10 @@ func _spawn_projectile(dir: Vector2) -> void:
 	get_parent().add_child(bullet)      # or a  dedicated “Projectiles” node
 
 func _get_aim_vector() -> Vector2:
-	return last_facing_dir.normalized()
+	var mouse_global = get_global_mouse_position()
+	var direction = (mouse_global - global_position).normalized()
+	return direction
+ 
 	
 func board_boat() -> void:
 	on_board = true
@@ -80,4 +92,22 @@ func board_boat() -> void:
 func deboard() -> void:
 	on_board = false
 	emit_signal("deboarded")
-	
+
+func take_damage(damage : int):
+	player_health -= damage
+	update_hud()
+	#if player_health <= 0:
+		#queue_free()
+
+func update_hud() -> void:
+	health_label.text = "Health : " + str(player_health)
+
+func apply_knockback(from: Vector2, strength: float):
+	var dir = (position - from).normalized()
+	position += dir * strength/resistance
+	knockback_timer.start(0.5)
+	stunned = true
+
+
+func _on_knockback_timer_timeout() -> void:
+	stunned = false

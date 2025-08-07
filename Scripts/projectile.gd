@@ -2,14 +2,16 @@ extends Area2D
 class_name Projectile        # handy if you want to spawn by name
 @export var speed        : float = 400.0
 @export var damage       : int   = 1
-@export var lifetime_sec : float = 1.5
+@export var lifetime_sec : float = .5
+
+
 
 var _velocity : Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	$Lifetime.wait_time = lifetime_sec
 	$Lifetime.start()
-	connect("area_entered", Callable(self, "_on_area_entered"))
+	connect("body_entered", Callable(self, "_on_body_entered"))
 
 func _physics_process(delta: float) -> void:
 	position += _velocity * delta
@@ -19,10 +21,13 @@ func fire(dir: Vector2) -> void:
 	_velocity = dir * speed
 	rotation = dir.angle()   # purely visual
 
-func _on_area_entered(area: Area2D) -> void:
-	if area.is_in_group("enemy"):
-		area.take_damage(damage)   # your own API
-		queue_free()
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("enemies"):
+		body.take_damage(10)  # or whatever your method is
+		queue_free()  # destroy projectile
+		print("Hit: ", body)
+	print("Hit: ", body)
 
-func _on_Lifetime_timeout() -> void:
+
+func _on_lifetime_timeout() -> void:
 	queue_free()
