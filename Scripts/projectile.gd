@@ -25,8 +25,8 @@ func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("enemies"):
 		body.take_damage(10)  # or whatever your method is
 		queue_free()  # destroy projectile
-		print("Hit: ", body)
-	print("Hit: ", body)
+	if body.is_in_group("walls"):
+		queue_free()
 
 
 func _on_lifetime_timeout() -> void:

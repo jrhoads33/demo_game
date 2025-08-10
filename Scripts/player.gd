@@ -1,4 +1,4 @@
-extends Area2D
+extends CharacterBody2D
 @export var projectile_scene : PackedScene = preload("res://Scenes/Projectile.tscn")
 @export var projectile_spawn_offset : float = 8.0   # moves bullet out of the player hurtbox
 @export var fire_cooldown := 0.2                     # seconds between shots
@@ -10,21 +10,16 @@ var time_since_last_shot := 0.0  # initialize at the script level
 var last_facing_dir : Vector2 = Vector2.RIGHT   # (1, 0)
 var on_board := false
 var near_boat := false
-@onready var vehicle = get_parent().get_node("boat")
 signal boarded
 signal deboarded
+
 var player_health := 100
-var velocity : Vector2
 var knockback_velocity 
-
 var resistance = 5
-
 var stunned := false
 
 func _ready():
 	add_to_group('player')
-	vehicle.player_entered_zone.connect(_on_player_near_vehicle)
-	vehicle.player_exited_zone.connect(_on_player_left_vehicle)
 	
 func _on_player_near_vehicle(player):
 	near_boat = true
@@ -44,10 +39,7 @@ func _input(event):
 func _physics_process(delta):
 	if stunned:
 		return
-	if not on_board:
-		_handle_movement(delta)
-	else:
-		position = vehicle.position
+	_handle_movement(delta)
 	_handle_shooting(delta)
 		
 
@@ -69,9 +61,7 @@ func _handle_movement(delta: float) -> void:
 
 	# Set velocity for CharacterBody2D
 	velocity = input_vector * move_speed
-
-	# Move the player
-	position += velocity * delta 
+	move_and_slide()
 	
 func _spawn_projectile(dir: Vector2) -> void:
 	var bullet := projectile_scene.instantiate() as Projectile

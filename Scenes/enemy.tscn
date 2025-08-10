@@ -26,4 +26,12 @@ shape = SubResource("CircleShape2D_hghv2")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox2"]
 shape = SubResource("CircleShape2D_1f0kj")
 
+[node name="ClassLabel" type="Label" parent="."]
+offset_left = -32.0
+offset_top = -56.0
+offset_right = 32.0
+offset_bottom = -9.0
+text = "None"
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="area_entered" from="HitBox2" to="." method="_on_hit_box_2_area_entered"]
