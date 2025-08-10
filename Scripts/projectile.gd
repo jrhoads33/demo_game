@@ -1,10 +1,8 @@
 extends Area2D
 class_name Projectile        # handy if you want to spawn by name
 @export var speed        : float = 400.0
-@export var damage       : int   = 1
+@export var damage       : int   = 10
 @export var lifetime_sec : float = .5
-
-
 
 var _velocity : Vector2 = Vector2.ZERO
 
@@ -23,8 +21,8 @@ func fire(dir: Vector2) -> void:
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("enemies"):
-		body.take_damage(10)  # or whatever your method is
-		queue_free()  # destroy projectile
+		body.take_damage(damage)
+		queue_free()
 	if body.is_in_group("walls"):
 		queue_free()
 

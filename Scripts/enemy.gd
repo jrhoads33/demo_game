@@ -9,6 +9,8 @@ var velocity : Vector2
 var player_class : String
 @onready var class_label : Label = $ClassLabel
 
+signal death
+
 
 func initialize(player_class_name : String) -> void:
 	player_class = player_class_name
@@ -32,6 +34,7 @@ func take_damage(damage: int) -> void:
 	enemy_health -= damage
 	print(enemy_health)
 	if enemy_health <= 0:
+		emit_signal("death")
 		queue_free()
 
 func _on_body_entered(body: Node2D) -> void:

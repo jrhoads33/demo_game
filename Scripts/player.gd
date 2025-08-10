@@ -1,5 +1,7 @@
 extends CharacterBody2D
 @export var projectile_scene : PackedScene = preload("res://Scenes/Projectile.tscn")
+@export var grapple_scene : PackedScene = preload("res://Scenes/grapple.tscn")
+
 @export var projectile_spawn_offset : float = 8.0   # moves bullet out of the player hurtbox
 @export var fire_cooldown := 0.2                     # seconds between shots
 var time_since_last_shot := 0.0  # initialize at the script level
@@ -10,8 +12,6 @@ var time_since_last_shot := 0.0  # initialize at the script level
 var last_facing_dir : Vector2 = Vector2.RIGHT   # (1, 0)
 var on_board := false
 var near_boat := false
-signal boarded
-signal deboarded
 
 var player_health := 100
 var knockback_velocity 
@@ -29,11 +29,9 @@ func _on_player_left_vehicle(player):
 
 
 func _input(event):
-	if event.is_action_pressed("interact"):
-		if near_boat and not on_board:
-			board_boat()
-		elif near_boat and on_board:
-			deboard()
+	if event.is_action_pressed("grapple"):
+		if get_tree().get_first_node_in_group("grapple") == null:
+			_handle_grapple()
 		
 
 func _physics_process(delta):
@@ -41,7 +39,14 @@ func _physics_process(delta):
 		return
 	_handle_movement(delta)
 	_handle_shooting(delta)
-		
+
+func _handle_grapple():
+		var dir := _get_aim_vector()
+		if dir != Vector2.ZERO:
+			var grapple := grapple_scene.instantiate() as Grapple
+			grapple.global_position = global_position + dir * projectile_spawn_offset
+			grapple.fire(dir)                    # pass direction -> sets velocity
+			get_parent().add_child(grapple)
 
 func _handle_shooting(delta: float) -> void:
 	time_since_last_shot += delta
@@ -74,15 +79,6 @@ func _get_aim_vector() -> Vector2:
 	var direction = (mouse_global - global_position).normalized()
 	return direction
  
-	
-func board_boat() -> void:
-	on_board = true
-	emit_signal("boarded")
-	
-func deboard() -> void:
-	on_board = false
-	emit_signal("deboarded")
-
 func take_damage(damage : int):
 	player_health -= damage
 	update_hud()
